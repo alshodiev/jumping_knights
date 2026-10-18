@@ -7,7 +7,7 @@ Login is not handled here: the Login button links to ChessLang at `coaching.jump
 Host anywhere that keeps a Node 20+ process running (Render, Fly.io, Railway, a VPS).
 
 - Root directory: `backend`
-- Build command: `npm ci && npm run build`
+- Build command: `npm ci --include=dev && npm run build`
 - Start command: `npm start`
 - Environment variables (set in the host's dashboard, never in the repo):
 
