@@ -7,3 +7,5 @@ cd frontend
 npm install
 npm run dev
 ```
+
+See `DEPLOY.md` for deployment and `backend/README.md` for the chat/Telegram setup.

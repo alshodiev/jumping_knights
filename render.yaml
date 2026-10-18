@@ -1,0 +1,31 @@
+# Render Blueprint: the Jumping Knights chat/contact backend (free plan).
+# Secrets (sync: false) are entered in the Render dashboard, never committed.
+services:
+  - type: web
+    name: jumping-knights-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: ALLOWED_ORIGINS
+        value: https://www.jumpingknights.org,https://jumpingknights.org
+      - key: TELEGRAM_GROUP_ID
+        value: "-1003853617661"
+      - key: TELEGRAM_COACH_USER_ID
+        value: "208501844"
+      - key: TELEGRAM_CLIENTS_THREAD_ID
+        value: "29"
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
