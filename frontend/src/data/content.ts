@@ -25,7 +25,6 @@ export const programs = [
       "Competitive practice games",
       "Weekly 60-minute sessions",
       "1 semester (12 classes) for $600",
-      "Monthly soccer game included in curriculum in Waterline Square",
     ],
   },
   {
