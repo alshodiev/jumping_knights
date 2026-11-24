@@ -7,6 +7,7 @@ import { scrollToId } from "@/lib/scroll";
 export const NAV = [
   { id: "home", label: "Home" },
   { id: "classes", label: "Programs" },
+  { id: "play", label: "Play" },
   { id: "locations", label: "Locations" },
   { id: "about", label: "About" },
   { id: "testimonials", label: "Testimonials" },
@@ -15,7 +16,12 @@ export const NAV = [
 
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const go = (id: string) => { scrollToId(id); setOpen(false); };
+  // Close the mobile menu first: while it is open the header is taller and pushes the page
+  // down, so scrolling before it closes overshoots the target.
+  const go = (id: string) => {
+    setOpen(false);
+    window.setTimeout(() => scrollToId(id), 60);
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200">
