@@ -43,3 +43,7 @@ Secrets live only in the host's environment settings, never in the repo.
 ## Notes
 - Telegram bots can't see when you're typing, so the visitor sees animated dots while waiting rather than "Coach is typing".
 - Chats are kept in a JSON file for 24h. On hosts with temporary disks, a restart ends open chats.
+
+## Private videos
+The same backend also serves the private video library (`/api/videos`, `/api/coach/*`): coach sign-in, direct-to-storage uploads, per-video passwords (hashed), signed watch links. Setup (Cloudflare R2, `npm run hash-password`, Render variables, `api.` address) is in `../DEPLOY.md`. In development no cloud account is needed: set `COACH_PASSWORD_HASH` (from `npm run hash-password`) in `.env` and videos are stored in `./data/storage`. Tests: `npm test` (includes `scripts/videos-e2e.ts`, which tries to get into videos the wrong way).
+

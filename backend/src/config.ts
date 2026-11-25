@@ -23,6 +23,26 @@ export const config = {
   trustProxy: num(process.env.TRUST_PROXY, 0),
   dataDir: process.env.DATA_DIR || "./data",
   isProd: process.env.NODE_ENV === "production",
+
+  // ---- Videos (private library) ----
+  /** Coach sign-in. Hash made with `npm run hash-password`. Without it, video management is disabled. */
+  coachUsername: process.env.COACH_USERNAME || "coach",
+  coachPasswordHash: process.env.COACH_PASSWORD_HASH ?? "",
+  /** Random secret used to sign the coach cookie. Make one with: openssl rand -hex 32 */
+  sessionSecret: process.env.SESSION_SECRET ?? "",
+  cookieSameSite: (["lax", "strict", "none"].includes(process.env.COOKIE_SAMESITE ?? "") ? process.env.COOKIE_SAMESITE : "lax") as "lax" | "strict" | "none",
+  cookieDomain: process.env.COOKIE_DOMAIN || undefined,
+  /** This API's own public address. Only used to build upload/stream links in local test mode. */
+  publicApiUrl: (process.env.PUBLIC_API_URL || `http://localhost:${num(process.env.PORT, 8787)}`).replace(/\/+$/, ""),
+  r2: {
+    accountId: process.env.R2_ACCOUNT_ID ?? "",
+    accessKeyId: process.env.R2_ACCESS_KEY_ID ?? "",
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? "",
+    bucket: process.env.R2_BUCKET ?? "",
+  },
+  maxVideoBytes: num(process.env.MAX_VIDEO_MB, 1024) * 1024 * 1024,
+  /** How long a "watch" link stays valid after the right password is entered. */
+  videoLinkTtlSeconds: num(process.env.VIDEO_LINK_TTL_SECONDS, 1800),
 };
 
 /** Must match the labels sent by the Register buttons on the site. */

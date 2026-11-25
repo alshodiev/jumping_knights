@@ -48,7 +48,7 @@ async function main() {
   const server = spawn("npx", ["tsx", "src/index.ts"], {
     env: { ...process.env, PORT: String(API_PORT), TELEGRAM_BOT_TOKEN: TOKEN, TELEGRAM_GROUP_ID: GROUP, TELEGRAM_COACH_USER_ID: COACH,
       TELEGRAM_API_BASE: `http://localhost:${TG_PORT}`, COACH_REPLY_TIMEOUT_SECONDS: "3", ANTHROPIC_API_KEY: "", DATA_DIR: `/tmp/jk-test-${Date.now()}`, ALLOWED_ORIGINS: "http://localhost:5173" },
-    stdio: ["ignore", "inherit", "inherit"],
+    stdio: ["ignore", "inherit", "inherit"], detached: true,
   });
   try {
     for (let i = 0; i < 40; i++) { try { if ((await api("/api/health")).ok) break; } catch {} await sleep(250); }
@@ -123,7 +123,7 @@ async function main() {
     check("closed chat rejects messages", (await post(`/api/chat/${id}/messages`, { text: "x" }, token)).status === 409);
     ctl.abort();
   } finally {
-    server.kill(); fake.close(); setTimeout(() => process.exit(failures ? 1 : 0), 200);
+    try { process.kill(-server.pid!, "SIGTERM"); } catch {} fake.close(); setTimeout(() => process.exit(failures ? 1 : 0), 200);
   }
   console.log(failures ? `\n${failures} FAILED` : "\nALL PASSED");
 }

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node -e \"require('node:fs').copyFileSync('dist/index.html','dist/404.html')\"",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview --port 4173"
   },
@@ -19,6 +19,7 @@
     "lucide-react": "^0.523.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-router-dom": "^7.18.7",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7"
   },

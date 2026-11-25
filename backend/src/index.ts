@@ -7,6 +7,8 @@ import { loadSessions, cleanup, getSession } from "./store.js";
 import * as chat from "./chat.js";
 import * as tg from "./telegram.js";
 import { etStamp, nameLabel, oneLine } from "./format.js";
+import { cleanupStaleUploads, videoRouter } from "./videos.js";
+import { getStorage, mountLocalStorage } from "./storage.js";
 
 loadSessions();
 setInterval(() => cleanup(), 3600_000).unref();
@@ -21,6 +23,9 @@ app.use(
       const devLocal = !config.isProd && !!origin && /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
       cb(null, !origin || devLocal || config.allowedOrigins.includes(origin));
     },
+    credentials: true, // the coach's sign-in cookie
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "X-Chat-Token", "X-JK-CSRF"],
   }),
 );
 app.use(express.json({ limit: "4kb" }));
@@ -29,6 +34,12 @@ app.use((_req, res, next) => {
   res.setHeader("Referrer-Policy", "no-referrer");
   next();
 });
+
+// ---- private video library ----
+app.use("/api", videoRouter());
+if (getStorage()?.kind === "local") mountLocalStorage(app); // development and tests only
+void cleanupStaleUploads();
+setInterval(() => void cleanupStaleUploads(), 3600_000).unref();
 
 const startLimiter = rateLimit({ windowMs: 3600_000, limit: config.startLimitPerHour, standardHeaders: true, legacyHeaders: false });
 const msgLimiter = rateLimit({ windowMs: 60_000, limit: 20, standardHeaders: true, legacyHeaders: false });
@@ -132,6 +143,8 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 
 app.listen(config.port, () => {
   console.log(`API on http://localhost:${config.port}  telegram=${tg.telegramEnabled}  claude=${Boolean(config.anthropicKey)}`);
+  const st = getStorage();
+  console.log(`videos: sign-in ${config.coachPasswordHash ? "ready" : "NOT set up (COACH_PASSWORD_HASH missing)"}, storage ${st ? st.kind : "NOT set up (R2_* missing)"}`);
   if (!tg.telegramEnabled) console.log("Telegram not configured: dev mock mode (POST /api/dev/coach-reply to answer as coach).");
 });
 tg.startPolling((threadId, text) => chat.coachMessage(threadId, text));
