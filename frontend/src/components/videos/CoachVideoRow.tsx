@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { copyText, formatDate, formatSize, watchLink } from "@/lib/format";
+import { copyText, formatPosted, formatSize, watchLink } from "@/lib/format";
 import { generatePassphrase } from "@/lib/passphrase";
 import { coachDelete, coachPatch, coachPlay, type CoachVideo } from "@/lib/videosApi";
 
@@ -40,7 +40,7 @@ export default function CoachVideoRow({ video, onChanged }: { video: CoachVideo;
         <div className="min-w-0">
           <p className="font-medium text-gray-900 break-words">{video.note || <span className="text-gray-400">No note</span>}</p>
           <p className="text-xs text-gray-500">
-            {formatDate(video.createdAt)} · {formatSize(video.size)}
+            {formatPosted(video.createdAt)} · {formatSize(video.size)}
             {video.status === "uploading" && <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-amber-800">Unfinished upload</span>}
           </p>
         </div>

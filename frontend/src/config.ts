@@ -9,3 +9,7 @@ export const SITE = {
   phoneHref: "tel:+13474755912",
   facebook: "https://www.facebook.com/murad.chess",
 };
+
+/** Videos: show the upload time next to the date (viewer's own time zone). Set to false for date only. */
+export const SHOW_VIDEO_TIME = true;
+

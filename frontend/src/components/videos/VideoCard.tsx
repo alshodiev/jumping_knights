@@ -1,22 +1,23 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Lock } from "lucide-react";
+import { Check, Lock, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatDate } from "@/lib/format";
-import { unlockVideo, type PublicVideo } from "@/lib/videosApi";
+import { copyText, formatPosted, watchLink } from "@/lib/format";
+import { coachPlay, unlockVideo, type PublicVideo } from "@/lib/videosApi";
 
 /**
  * A private video in the feed. Locked it shows only a grey box and the date posted.
  * Nothing about the video is requested until the right password is entered.
  */
-export default function VideoCard({ video, autoOpen = false }: { video: PublicVideo; autoOpen?: boolean }) {
+export default function VideoCard({ video, autoOpen = false, coach = false }: { video: PublicVideo; autoOpen?: boolean; coach?: boolean }) {
   const [open, setOpen] = useState(autoOpen);
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [src, setSrc] = useState<string | null>(null);
+  const [shareNote, setShareNote] = useState("");
   const input = useRef<HTMLInputElement>(null);
-  const posted = formatDate(video.createdAt);
+  const posted = formatPosted(video.createdAt);
 
   useEffect(() => { if (open && !src) input.current?.focus(); }, [open, src]);
 
@@ -34,6 +35,22 @@ export default function VideoCard({ video, autoOpen = false }: { video: PublicVi
     } finally {
       setBusy(false);
     }
+  };
+
+  // Signed-in coach: watch without typing the password
+  const watchAsCoach = async () => {
+    if (busy) return;
+    setBusy(true); setError("");
+    try { setSrc((await coachPlay(video.id)).url); }
+    catch (err) { setError((err as Error).message); }
+    finally { setBusy(false); }
+  };
+
+  // Copies this video's page link (never the password) so it can be pasted into a message
+  const share = async () => {
+    const ok = await copyText(watchLink(video.id));
+    setShareNote(ok ? "Link copied" : "Couldn't copy. Please copy the address from your browser.");
+    window.setTimeout(() => setShareNote(""), 2200);
   };
 
   // The watch link lasts a limited time. If it runs out, ask for the password again.
@@ -60,7 +77,18 @@ export default function VideoCard({ video, autoOpen = false }: { video: PublicVi
       )}
 
       <div className="px-4 py-3">
-        <p className={src ? "text-sm text-gray-600" : "text-sm text-gray-500"}>Posted {posted}</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className={src ? "text-sm text-gray-600" : "text-sm text-gray-500"}>Posted {posted}</p>
+          {src && (
+            <div className="flex items-center gap-2">
+              <span role="status" aria-live="polite" className="text-xs text-green-700">{shareNote}</span>
+              <Button type="button" size="sm" variant="outline" onClick={share} aria-label="Share: copy the link to this video">
+                {shareNote === "Link copied" ? <Check className="h-4 w-4" aria-hidden /> : <Share2 className="h-4 w-4" aria-hidden />}
+                <span className="ml-1.5">Share</span>
+              </Button>
+            </div>
+          )}
+        </div>
 
         {!src && !open && <p className="mt-1 text-xs text-gray-400">Select to watch with a password.</p>}
 
@@ -85,6 +113,11 @@ export default function VideoCard({ video, autoOpen = false }: { video: PublicVi
           </form>
         )}
         {!src && open && error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+        {!src && coach && (
+          <button type="button" onClick={watchAsCoach} disabled={busy} className="mt-2 text-sm text-blue-900 underline disabled:opacity-50">
+            Watch without a password (coach)
+          </button>
+        )}
       </div>
     </article>
   );
